@@ -25,12 +25,12 @@ window.onload=function(){
 
   MIDI.loadPlugin({
 		soundfontUrl: "./soundfont/",
-		instrument: "acoustic_grand_piano",
+		instruments: ["acoustic_grand_piano", "acoustic_guitar_nylon", "flute", "electric_guitar_jazz"],
 		onprogress: function(state, progress) {
-			//console.log(state, progress);
+			console.log(state, progress);
 		},
 		onsuccess: function() {
-			console.log("MIDI ready");
+  		console.log("MIDI ready");
 		}
 	});
 };
@@ -148,8 +148,27 @@ function findxy(action, e){
           //calculate the note based on the length of the line
           var noteSize=Math.round(distance2([notes[i][1], notes[i][2]], [notes[i][3], notes[i][4]]));
           var note=Math.round(map(noteSize, 1, maxNoteSize, 21, 108));
-          MIDI.noteOn(0, note, velocity, 0);
-          MIDI.noteOff(0, note, 1);
+          // because this doesn't work in the MIDI onLoad, we change programs here
+          MIDI.programChange(0, 0); // acoustic_grand_piano
+    			MIDI.programChange(1, 24); // acoustic_guitar_nylon
+          MIDI.programChange(2, 73); // flute
+    			MIDI.programChange(3, 26); // electric_guitar_jazz
+          var instrument;
+          switch (notes[i][0]) {
+            case "#007bff":
+              instrument=0;
+              break;
+            case "#28a745":
+              instrument=1;
+              break;
+            case "#ffc107":
+              instrument=2;
+              break;
+            default:
+              instrument=3;
+          }
+          MIDI.noteOn(instrument, note, velocity, 0);
+          MIDI.noteOff(instrument, note, 1);
           console.log(note+" "+velocity);
         }
         //update side of note mouse is at
