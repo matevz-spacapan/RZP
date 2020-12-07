@@ -147,7 +147,7 @@ function findxy(action, e){
           var velocity = Math.min(127, mouseVelocity());
           //calculate the note based on the length of the line
           var noteSize=Math.round(distance2([notes[i][1], notes[i][2]], [notes[i][3], notes[i][4]]));
-          var note=Math.round(map(noteSize, 1, maxNoteSize, 21, 108));
+          var note=Math.round(map(noteSize, 1, maxNoteSize, 108, 21));
           // because this doesn't work in the MIDI onLoad, we change programs here
           MIDI.programChange(0, 0); // acoustic_grand_piano
     			MIDI.programChange(1, 24); // acoustic_guitar_nylon
