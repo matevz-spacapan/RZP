@@ -33,6 +33,10 @@ window.onload=function(){
   		console.log("MIDI ready");
 		}
 	});
+
+  $(".custom-file-input").change(function(){
+    $(this).siblings(".custom-file-label").addClass("selected").html("Loaded "+$(this).val().split("\\").pop());
+  });
 };
 
 //function for exporting the line data
@@ -40,7 +44,10 @@ function exportNotes(){
   var element = document.createElement('a');
   var exporting="";
   for (var i = 0; i < notes.length; i++) {
-    exporting+=notes[i].join(";")+"\n";
+    if(i+1<notes.length)
+      exporting+=notes[i].slice(0,5).join(";")+"\n";
+    else
+      exporting+=notes[i].slice(0,5).join(";");
   }
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(exporting));
   element.setAttribute('download', "notes.txt");
@@ -59,8 +66,7 @@ function uploadNotes(e){
       notes=[];
     for (var i = 0; i < content.length; i++){
       var currentNote=content[i].split(";");
-      if(currentNote.length==6)
-        notes.push([currentNote[0], currentNote[1], currentNote[2], currentNote[3], currentNote[4], null]);
+      notes.push([currentNote[0], currentNote[1], currentNote[2], currentNote[3], currentNote[4], null]);
     }
     drawAll();
   }

@@ -28,17 +28,30 @@
     <div class="text-center mb-3">
       <canvas id="canvas" width="1850" height="900px" style="border: 1px solid red;"></canvas>
     </div>
-    <div class="text-center">
-      <p>Controls</p>
-      <button type="button" class="btn btn-primary" onclick="colorSet('#007bff')">Acoustic grand piano</button>
-      <button type="button" class="btn btn-success" onclick="colorSet('#28a745')">Acoustic guitar (nylon)</button>
-      <button type="button" class="btn btn-warning" onclick="colorSet('#ffc107')">Flute</button>
-      <button type="button" class="btn btn-danger" onclick="colorSet('#dc3545')">Electric guitar (jazz)</button>
-      <button type="button" class="btn btn-light" onclick="eraser()">Eraser</button><br><br>
-      <button type="button" class="btn btn-light" onclick="exportNotes()">Export drawing</button>
-      <input type="file" name="upload" id="upload" onchange="uploadNotes(this)">
-      <button type="button" class="btn btn-light" onclick="" disabled>Begin recording</button>
-      <button type="button" class="btn btn-light" style="display: none;" onclick="" disabled>End recording</button>
+    <div class="container">
+      <div class="row text-center">
+        <div class="col">
+          <p>Controls</p>
+          <button type="button" class="btn btn-primary mb-1" onclick="colorSet('#007bff')">Grand piano</button><br>
+          <button type="button" class="btn btn-success mb-1" onclick="colorSet('#28a745')">Acoustic guitar</button><br>
+          <button type="button" class="btn btn-warning mb-1" onclick="colorSet('#ffc107')">Flute</button><br>
+          <button type="button" class="btn btn-danger mb-1" onclick="colorSet('#dc3545')">Electric guitar</button><br>
+          <button type="button" class="btn btn-light" onclick="eraser()">Eraser</button>
+        </div>
+        <div class="col">
+          <p>Export or import your drawing</p>
+          <button type="button" class="btn btn-light mb-1" onclick="exportNotes()">Export</button><br>
+          <div class="custom-file">
+            <input class="custom-file-input" type="file" name="upload" id="upload" onchange="uploadNotes(this)" onclick="eraser()">
+            <label class="custom-file-label" for="upload">Choose file</label>
+          </div>
+        </div>
+        <div class="col">
+          <p>Record your song</p>
+          <button type="button" class="btn btn-light" onclick="" disabled>Begin recording</button>
+          <button type="button" class="btn btn-light" style="display: none;" onclick="" disabled>End recording</button>
+        </div>
+      </div>
     </div>
   </div>
 </body>
