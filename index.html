@@ -36,7 +36,7 @@
       <button type="button" class="btn btn-danger" onclick="colorSet('#dc3545')">Electric guitar (jazz)</button>
       <button type="button" class="btn btn-light" onclick="eraser()">Eraser</button><br><br>
       <button type="button" class="btn btn-light" onclick="exportNotes()">Export drawing</button>
-      <button type="button" class="btn btn-light" onclick="">Import drawing</button>
+      <input type="file" name="upload" id="upload" onchange="uploadNotes(this)">
       <button type="button" class="btn btn-light" onclick="" disabled>Begin recording</button>
       <button type="button" class="btn btn-light" style="display: none;" onclick="" disabled>End recording</button>
     </div>

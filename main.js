@@ -50,6 +50,23 @@ function exportNotes(){
   document.body.removeChild(element);
 }
 
+//handle file uploads - load the drawn notes
+function uploadNotes(e){
+  var fr=new FileReader();
+  fr.onload=function(){
+    var content=fr.result.split("\n");
+    if(content.length>0)
+      notes=[];
+    for (var i = 0; i < content.length; i++){
+      var currentNote=content[i].split(";");
+      if(currentNote.length==6)
+        notes.push([currentNote[0], currentNote[1], currentNote[2], currentNote[3], currentNote[4], null]);
+    }
+    drawAll();
+  }
+  fr.readAsText(e.files[0]);
+}
+
 //set color of line
 function colorSet(newcolor){
   color=newcolor;
