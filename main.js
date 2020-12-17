@@ -5,7 +5,8 @@ var canvas, ctx,
     notes=[], //array of lines
     mode=true, //draw=true, erase=false
     time0=Date.now(), time=Date.now(), //time for mouse velocity
-    maxNoteSize; //the biggest possible length of a line
+    maxNoteSize, //the biggest possible length of a line
+    instrumentRange=[{start:21, end:108}, {start:21, end:108}, {start:21, end:108}, {start:21, end:96}];
 
 window.onload=function(){
   canvas = document.getElementById('canvas');
@@ -31,6 +32,10 @@ window.onload=function(){
 		},
 		onsuccess: function() {
   		console.log("MIDI ready");
+      MIDI.programChange(0, 0); // acoustic_grand_piano
+      MIDI.programChange(1, 24); // acoustic_guitar_nylon
+      MIDI.programChange(2, 73); // flute
+      MIDI.programChange(3, 26); // electric_guitar_jazz
 		}
 	});
 
@@ -75,8 +80,11 @@ function uploadNotes(e){
 
 //set color of line
 function colorSet(newcolor){
+  $(color).removeClass("spinner-grow spinner-grow-sm");
   color=newcolor;
   mode=true;
+  $(color).addClass("spinner-grow spinner-grow-sm");
+  $("#eraser").removeClass("spinner-grow spinner-grow-sm");
 }
 
 //draw a single line on the canvas
@@ -108,6 +116,17 @@ function clearCanvas(){
 //change mode to removing lines
 function eraser(){
   mode=false;
+  $(color).removeClass("spinner-grow spinner-grow-sm");
+  $("#eraser").addClass("spinner-grow spinner-grow-sm");
+}
+
+//remove all lines
+function clearAll(){
+  mode=true;
+  notes=[];
+  clearCanvas();
+  $("#eraser").removeClass("spinner-grow spinner-grow-sm");
+  $(color).addClass("spinner-grow spinner-grow-sm");
 }
 
 //calculate distance between point A and B
@@ -146,11 +165,12 @@ function map(x, in_min, in_max, out_min, out_max){
 
 //function for deciding the action we're doing and the coordinates of the action
 function findxy(action, e){
+  var rect = canvas.getBoundingClientRect();
 
   //set starting point of line
   if(action=='down'){
-    x0=e.clientX-canvas.offsetLeft;
-    y0=e.clientY-canvas.offsetTop;
+    x0=e.clientX-rect.left;
+    y0=e.clientY-rect.top;
   }
 
   //mouse button was released
@@ -170,8 +190,8 @@ function findxy(action, e){
 
   //the mouse was moved to a different spot
   if(action=='move'){
-    x=e.clientX-canvas.offsetLeft;
-    y=e.clientY-canvas.offsetTop;
+    x=e.clientX-rect.left;
+    y=e.clientY-rect.top;
 
     //draw line from start point to current point if mouse was pressed down before
     if(x0!=-1 && y0!=-1 && mode)
@@ -206,12 +226,6 @@ function findxy(action, e){
           var velocity = Math.min(127, mouseVelocity());
           //calculate the note based on the length of the line
           var noteSize=Math.round(distance2([notes[i][1], notes[i][2]], [notes[i][3], notes[i][4]]));
-          var note=Math.round(map(noteSize, 1, maxNoteSize, 108, 21));
-          // because this doesn't work in the MIDI onLoad, we change programs here
-          MIDI.programChange(0, 0); // acoustic_grand_piano
-    			MIDI.programChange(1, 24); // acoustic_guitar_nylon
-          MIDI.programChange(2, 73); // flute
-    			MIDI.programChange(3, 26); // electric_guitar_jazz
           var instrument;
           switch (notes[i][0]) {
             case "#007bff":
@@ -226,6 +240,7 @@ function findxy(action, e){
             default:
               instrument=3;
           }
+          var note=Math.round(map(noteSize, 1, maxNoteSize, instrumentRange[instrument].end, instrumentRange[instrument].start));
           MIDI.noteOn(instrument, note, velocity, 0);
           MIDI.noteOff(instrument, note, 1);
           console.log(note+" "+velocity);

@@ -9,14 +9,28 @@
   <!--jQuery-->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
   <!--https://github.com/mudcube/MIDI.js-->
-  <script src="./inc/Base64.js" type="text/javascript"></script>
-  <script src="./inc/base64binary.js" type="text/javascript"></script>
-  <script src="./js/MIDI/AudioDetect.js" type="text/javascript"></script>
-  <script src="./js/MIDI/LoadPlugin.js" type="text/javascript"></script>
-  <script src="./js/MIDI/Plugin.js" type="text/javascript"></script>
-  <script src="./js/MIDI/Player.js" type="text/javascript"></script>
-  <script src="./js/Window/DOMLoader.XMLHttp.js" type="text/javascript"></script>
-  <script src="./js/Window/DOMLoader.script.js" type="text/javascript"></script>
+  <!--<script src="./inc_old/Base64.js" type="text/javascript"></script>
+  <script src="./inc_old/base64binary.js" type="text/javascript"></script>
+  <script src="./js_old/MIDI/AudioDetect.js" type="text/javascript"></script>
+  <script src="./js_old/MIDI/LoadPlugin.js" type="text/javascript"></script>
+  <script src="./js_old/MIDI/Plugin.js" type="text/javascript"></script>
+  <script src="./js_old/MIDI/Player.js" type="text/javascript"></script>
+  <script src="./js_old/Window/DOMLoader.XMLHttp.js" type="text/javascript"></script>
+  <script src="./js_old/Window/DOMLoader.script.js" type="text/javascript"></script>-->
+  <!-- polyfill -->
+	<script src="./inc/shim/Base64.js" type="text/javascript"></script>
+	<script src="./inc/shim/Base64binary.js" type="text/javascript"></script>
+	<script src="./inc/shim/WebAudioAPI.js" type="text/javascript"></script>
+	<!-- midi.js package -->
+	<script src="./js/midi/audioDetect.js" type="text/javascript"></script>
+	<script src="./js/midi/gm.js" type="text/javascript"></script>
+	<script src="./js/midi/loader.js" type="text/javascript"></script>
+	<script src="./js/midi/plugin.audiotag.js" type="text/javascript"></script>
+	<script src="./js/midi/plugin.webaudio.js" type="text/javascript"></script>
+	<script src="./js/midi/plugin.webmidi.js" type="text/javascript"></script>
+	<!-- utils -->
+	<script src="./js/util/dom_request_xhr.js" type="text/javascript"></script>
+	<script src="./js/util/dom_request_script.js" type="text/javascript"></script>
   <!--Custom script-->
   <script src="main.js" type="text/javascript"></script>
 </head>
@@ -32,11 +46,12 @@
       <div class="row text-center">
         <div class="col">
           <p>Controls</p>
-          <button type="button" class="btn btn-primary mb-1" onclick="colorSet('#007bff')">Grand piano</button><br>
-          <button type="button" class="btn btn-success mb-1" onclick="colorSet('#28a745')">Acoustic guitar</button><br>
-          <button type="button" class="btn btn-warning mb-1" onclick="colorSet('#ffc107')">Flute</button><br>
-          <button type="button" class="btn btn-danger mb-1" onclick="colorSet('#dc3545')">Electric guitar</button><br>
-          <button type="button" class="btn btn-light" onclick="eraser()">Eraser</button>
+          <button type="button" class="btn btn-primary mb-1" onclick="colorSet('#007bff')">Grand piano <span class="spinner-grow spinner-grow-sm" id="007bff"></span></button><br>
+          <button type="button" class="btn btn-success mb-1" onclick="colorSet('#28a745')">Acoustic guitar <span id="28a745"></span></button><br>
+          <button type="button" class="btn btn-warning mb-1" onclick="colorSet('#ffc107')">Flute <span id="ffc107"></span></button><br>
+          <button type="button" class="btn btn-danger mb-1" onclick="colorSet('#dc3545')">Electric guitar <span id="dc3545"></span></button><br>
+          <button type="button" class="btn btn-light" onclick="eraser()">Eraser <span  id="eraser"></span></button>
+          <button type="button" class="btn btn-light" onclick="clearAll()">Clear all</button>
         </div>
         <div class="col">
           <p>Export or import your drawing</p>
