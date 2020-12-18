@@ -1,12 +1,14 @@
 var canvas, ctx,
-    x0 = -1, x = -1, //initial x, y
-    y0 = -1, y = -1, //current x, y
     color = "#007bff", //line color
     notes=[], //array of lines
     mode=true, //draw=true, erase=false
-    time0=Date.now(), time=Date.now(), //time for mouse velocity
     maxNoteSize, //the biggest possible length of a line
     instrumentRange=[{start:21, end:108}, {start:21, end:108}, {start:21, end:108}, {start:21, end:96}];
+
+var previousMouse={x:-1, y:-1};
+var line={start:{x:-1, y:-1}, end:{x:-1, y:-1}}
+
+var time={previous:Date.now(), current:Date.now()};
 
 window.onload=function(){
   canvas = document.getElementById('canvas');
@@ -47,13 +49,7 @@ window.onload=function(){
 //function for exporting the line data
 function exportNotes(){
   var element = document.createElement('a');
-  var exporting="";
-  for (var i = 0; i < notes.length; i++) {
-    if(i+1<notes.length)
-      exporting+=notes[i].slice(0,5).join(";")+"\n";
-    else
-      exporting+=notes[i].slice(0,5).join(";");
-  }
+  var exporting=JSON.stringify(notes);
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(exporting));
   element.setAttribute('download', "notes.txt");
   element.style.display = 'none';
@@ -66,14 +62,17 @@ function exportNotes(){
 function uploadNotes(e){
   var fr=new FileReader();
   fr.onload=function(){
-    var content=fr.result.split("\n");
-    if(content.length>0)
-      notes=[];
-    for (var i = 0; i < content.length; i++){
-      var currentNote=content[i].split(";");
-      notes.push([currentNote[0], currentNote[1], currentNote[2], currentNote[3], currentNote[4], null]);
+    try{
+      var content=JSON.parse(fr.result);
+      if(content.length>0){
+        notes=content;
+      }
+      drawAll();
     }
-    drawAll();
+    catch(e){
+      console.log("Couldn't parse file.");
+      console.log(e);
+    }
   }
   fr.readAsText(e.files[0]);
 }
@@ -88,10 +87,10 @@ function colorSet(newcolor){
 }
 
 //draw a single line on the canvas
-function draw(color, x0, y0, x, y){
+function draw(color, line){
   ctx.beginPath();
-  ctx.moveTo(x0, y0);
-  ctx.lineTo(x, y);
+  ctx.moveTo(line.start.x, line.start.y);
+  ctx.lineTo(line.end.x, line.end.y);
   ctx.strokeStyle=color;
   ctx.stroke();
   ctx.closePath();
@@ -100,11 +99,11 @@ function draw(color, x0, y0, x, y){
 //clear canvas, draw all lines on the canvas stored in the array and the current line if we're in drawing mode
 function drawAll(){
   clearCanvas();
-  $.each(notes, function(index, value){
-    draw(value[0], value[1], value[2], value[3], value[4]);
-  });
+  for (var i = 0; i < notes.length; i++) {
+    draw(notes[i].color, notes[i].line);
+  }
   if(mode){
-    draw(color, x0, y0, x, y);
+    draw(color, line);
   }
 }
 
@@ -129,38 +128,24 @@ function clearAll(){
   $(color).addClass("spinner-grow spinner-grow-sm");
 }
 
-//calculate distance between point A and B
-function distance2(a, b){
-  return Math.sqrt(Math.pow(a[0]-b[0], 2)+Math.pow(a[1]-b[1], 2));
-}
-
-//return the sum of distances of points AB+BC (B being the mouse cursor)
-//and the distance between AC (line start & end)
-function distance3(a, b, c){
-  var abc=distance2([a[0], a[1]], [b[0], b[1]]) + distance2([b[0], b[1]], [c[0], c[1]]),
-      ac=distance2([a[0], a[1]], [c[0], c[1]]);
-  return [abc.toFixed(1), ac.toFixed(1)];
-}
-
-//return if we're on the left or right side of a line
-function sideOfNote(x, y, note){
-  var d=(x-note[1])*(note[4]-note[2])-(y-note[2])*(note[3]-note[1]);
-  return d<0;
+//calculate distance between points on given line (start, end)
+function distance(line){
+  return Math.sqrt(Math.pow(line.start.x-line.end.x, 2) + Math.pow(line.start.y-line.end.y, 2));
 }
 
 //return speed of mouse used for note velocity
 function mouseVelocity(){
-  time0 = Date.now();
-  x_dist = x0 - x;
-  y_dist = y0 - y;
-  interval = time0 - time;
-  time = time0;
-  return Math.round(10*Math.sqrt(x_dist*x_dist+y_dist*y_dist)/interval);
+  time.current = Date.now();
+  x_dist = line.start.x - line.end.x;
+  y_dist = line.start.y - line.end.y;
+  interval = time.current - time.previous;
+  time.previous = time.current;
+  return Math.round(10 * Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2)) / interval);
 }
 
 //map values between two ranges [A-B]->[C-D]
 function map(x, in_min, in_max, out_min, out_max){
-  return (x-in_min)*(out_max-out_min)/(in_max-in_min)+out_min;
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 //function for deciding the action we're doing and the coordinates of the action
@@ -169,20 +154,18 @@ function findxy(action, e){
 
   //set starting point of line
   if(action=='down'){
-    x0=e.clientX-rect.left;
-    y0=e.clientY-rect.top;
+    line.start.x=e.clientX-rect.left;
+    line.start.y=e.clientY-rect.top;
   }
 
   //mouse button was released
   if(action=='up'){
     //save line to array to redraw always
     if(mode)
-      notes.push([color, x0, y0, x, y, null]);
+      notes.push({color:color, line:line});
+    //console.log(JSON.stringify(notes));
     //clear this line
-    x0=-1;
-    y0=-1;
-    x=-1;
-    y=-1;
+    line={start:{x:-1, y:-1}, end:{x:-1, y:-1}}
     //draw (from array only)
     if(mode)
       drawAll();
@@ -190,18 +173,18 @@ function findxy(action, e){
 
   //the mouse was moved to a different spot
   if(action=='move'){
-    x=e.clientX-rect.left;
-    y=e.clientY-rect.top;
+    line.end.x=e.clientX-rect.left;
+    line.end.y=e.clientY-rect.top;
 
     //draw line from start point to current point if mouse was pressed down before
-    if(x0!=-1 && y0!=-1 && mode)
+    if(line.start.x!=-1 && line.start.y!=-1 && mode)
       drawAll();
 
     //erase lines we cross if mouse was pressed down before
-    else if(x0!=-1 && y0!=-1 && !mode){
+    else if(line.start.x!=-1 && line.start.y!=-1 && !mode){
       for(var i=0;i<notes.length;i++){
-        var distances=distance3([notes[i][1], notes[i][2]], [x, y], [notes[i][3], notes[i][4]]);
-        if(distances[0]==distances[1]){
+        var crosses=intersects(notes[i].line, {start:previousMouse, end:line.end});
+        if(crosses){
           notes.splice(i, 1);
           drawAll();
           i--;
@@ -212,22 +195,17 @@ function findxy(action, e){
     //play note if we're not holding the mouse button
     else{
       for(var i=0;i<notes.length;i++){
-        var d=sideOfNote(x, y, notes[i]);
-        //newly created note needs a side; we don't do this at creation because we could play note instantly
-        if(notes[i][5]==null){
-          notes[i][5]=d;
-        }
 
-        //if mousePos in note is opposite to current AND distances is returning true, then play note
-        var distances=distance3([notes[i][1], notes[i][2]], [x, y], [notes[i][3], notes[i][4]]);
+        //calculating if line between previous mouseX/Y and current mouseX/Y intersects the line
+        var crosses=intersects(notes[i].line, {start:previousMouse, end:line.end});
 
-        if(notes[i][5]!=d && distances[0]==distances[1]){
+        if(crosses){
           //calculate mouse velocity
           var velocity = Math.min(127, mouseVelocity());
           //calculate the note based on the length of the line
-          var noteSize=Math.round(distance2([notes[i][1], notes[i][2]], [notes[i][3], notes[i][4]]));
+          var noteSize=Math.round(distance(notes[i].line));
           var instrument;
-          switch (notes[i][0]) {
+          switch (notes[i].color) {
             case "#007bff":
               instrument=0;
               break;
@@ -245,10 +223,25 @@ function findxy(action, e){
           MIDI.noteOff(instrument, note, 1);
           console.log(note+" "+velocity);
         }
-
-        //update side of note mouse is at
-        notes[i][5]=d;
       }
     }
+
+    //update where mouse was in this frame, to use in the next frame
+    previousMouse.x=line.end.x;
+    previousMouse.y=line.end.y;
+  }
+}
+
+//returns if the two lines intersect
+function intersects(line1, line2){
+  var det, gamma, lambda;
+  det = (line1.end.x - line1.start.x) * (line2.end.y - line2.start.y) - (line2.end.x - line2.start.x) * (line1.end.y - line1.start.y);
+  if (det === 0) {
+    return false;
+  }
+  else {
+    lambda = ((line2.end.y - line2.start.y) * (line2.end.x - line1.start.x) + (line2.start.x - line2.end.x) * (line2.end.y - line1.start.y)) / det;
+    gamma = ((line1.start.y - line1.end.y) * (line2.end.x - line1.start.x) + (line1.end.x - line1.start.x) * (line2.end.y - line1.start.y)) / det;
+    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
   }
 }
