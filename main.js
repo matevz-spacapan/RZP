@@ -7,6 +7,8 @@ var canvas, ctx,
 
 var previousMouse={x:-1, y:-1};
 var line={start:{x:-1, y:-1}, end:{x:-1, y:-1}}
+var mediaRecorder;
+var chunks = [];
 
 var time={previous:Date.now(), current:Date.now()};
 
@@ -14,6 +16,7 @@ window.onload=function(){
   canvas = document.getElementById('canvas');
   maxNoteSize=Math.round(Math.sqrt(Math.pow(canvas.width, 2)+Math.pow(canvas.height, 2)));
   ctx = canvas.getContext("2d");
+  clearCanvas();
   ctx.lineWidth = 3;
 
   $("#canvas").mousedown(function(e) {
@@ -38,6 +41,24 @@ window.onload=function(){
       MIDI.programChange(1, 24); // acoustic_guitar_nylon
       MIDI.programChange(2, 73); // flute
       MIDI.programChange(3, 26); // electric_guitar_jazz
+      mediaRecorder=new MediaRecorder(MIDI.getStream().stream); //hopefully to record media
+
+      // push each chunk (blobs) in an array
+      mediaRecorder.ondataavailable = function(evt) {
+        chunks.push(evt.data);
+      };
+
+      // Make blob out of our blobs, and open it.
+      mediaRecorder.onstop = function(evt) {
+        var element = document.createElement('a');
+        var blob = new Blob(chunks, {'type':'audio/ogg; codecs=opus'});
+        element.setAttribute('href', URL.createObjectURL(blob));
+        element.setAttribute('download', "sound.ogg");
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+      };
 		}
 	});
 
@@ -77,6 +98,20 @@ function uploadNotes(e){
   fr.readAsText(e.files[0]);
 }
 
+function recorder(mode){
+  if(mode){
+    chunks = [];
+    mediaRecorder.start();
+    $("#beginRec").hide();
+    $("#endRec").show();
+  }
+  else{
+    mediaRecorder.stop();
+    $("#endRec").hide();
+    $("#beginRec").show();
+  }
+}
+
 //set color of line
 function colorSet(newcolor){
   $(color).removeClass("spinner-grow spinner-grow-sm");
@@ -109,7 +144,9 @@ function drawAll(){
 
 //clear the entire canvas
 function clearCanvas(){
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "white";
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 //change mode to removing lines

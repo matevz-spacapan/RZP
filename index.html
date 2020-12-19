@@ -36,38 +36,48 @@
 </head>
 <body>
   <div id="container-fluid">
-    <div class="h1 text-center">
+    <!--<div class="h1 text-center">
       Draw and play
-    </div>
-    <div class="text-center mb-3">
-      <canvas id="canvas" width="1850" height="900px" style="border: 1px solid red;"></canvas>
-    </div>
-    <div class="container">
-      <div class="row text-center">
-        <div class="col">
-          <p>Controls</p>
+    </div>-->
+    <div class="container-fluid bg-secondary py-3">
+      <div class="row">
+        <div class="col-10 text-center">
+          <canvas id="canvas" width="1850" height="900px"></canvas>
+        </div>
+        <div class="col text-center text-light">
+          <h6 class="mt-4">Controls</h6>
           <button type="button" class="btn btn-primary mb-1" onclick="colorSet('#007bff')">Grand piano <span class="spinner-grow spinner-grow-sm" id="007bff"></span></button><br>
           <button type="button" class="btn btn-success mb-1" onclick="colorSet('#28a745')">Acoustic guitar <span id="28a745"></span></button><br>
           <button type="button" class="btn btn-warning mb-1" onclick="colorSet('#ffc107')">Flute <span id="ffc107"></span></button><br>
           <button type="button" class="btn btn-danger mb-1" onclick="colorSet('#dc3545')">Electric guitar <span id="dc3545"></span></button><br>
           <button type="button" class="btn btn-light" onclick="eraser()">Eraser <span  id="eraser"></span></button>
           <button type="button" class="btn btn-light" onclick="clearAll()">Clear all</button>
-        </div>
-        <div class="col">
-          <p>Export or import your drawing</p>
+
+          <h6 class="mt-5">Export or import your drawing</h6>
           <button type="button" class="btn btn-light mb-1" onclick="exportNotes()">Export</button><br>
           <div class="custom-file">
             <input class="custom-file-input" type="file" name="upload" id="upload" onchange="uploadNotes(this)" onclick="eraser()">
             <label class="custom-file-label" for="upload">Choose file</label>
           </div>
-        </div>
-        <div class="col">
-          <p>Record your song</p>
-          <button type="button" class="btn btn-light" onclick="" disabled>Begin recording</button>
-          <button type="button" class="btn btn-light" style="display: none;" onclick="" disabled>End recording</button>
+
+          <h6 class="mt-5">Record your song</h6>
+          <button id="beginRec" type="button" class="btn btn-light" onclick="recorder(true)">Begin recording</button><br>
+          <button id="endRec" type="button" class="btn btn-light" onclick="recorder(false)" style="display: none;">End recording</button>
         </div>
       </div>
     </div>
+    <div class="container text-center">
+      <h5>About the project & how to use</h5>
+      <p>This peoject was done as part of the subject Computer based sound production at University of Ljubljana.</p>
+      <p>On the surface above you can draw lines which will act as musical notes. To select the instrument, use the appropriate buttons on the right and draw by clicking where you want the note to start and releasing where you want it to end. To play a note simply move your mouse over the drawn line. The faster you move, the louder it will be (like pressing harder on piano keys).</p>
+      <p>If you make a mistake you can erase notes by using the <i>Eraser</i> button by clicking and moving your mouse over notes while holding the mouse button. If you want to erase all lines, click <i>Clear all</i>.</p>
+      <p>You can also save your drawing by clicking the <i>Export</i> button. Likewise, you can import your previously saved drawings by loading the correct file from your device.</p>
+      <p>You can also record the played notes (in Google Chrome) by pressing the <i>Begin recording</i> button. Once you're done playing, click <i>End recording</i> and the song will download to your device.</p>
+    </div>
   </div>
+  <footer class="text-center">
+    © Matevž Špacapan, 2020<br>
+    Projekt temelji na <a href="https://galactic.ink/midi-js/">MIDI-js knjižnici</a>.
+  </footer>
 </body>
 </html>
