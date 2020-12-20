@@ -1,16 +1,17 @@
-var canvas, ctx,
-    color = "#007bff", //line color
-    notes=[], //array of lines
+var canvas, ctx; //canvas variables
+var color = "#007bff", //current line color
+    line={start:{x:-1, y:-1}, end:{x:-1, y:-1}}, //current line start and end points
+    notes=[], //array of saved lines
     mode=true, //draw=true, erase=false
     maxNoteSize, //the biggest possible length of a line
-    instrumentRange=[{start:21, end:108}, {start:21, end:108}, {start:21, end:108}, {start:21, end:96}];
+    instrumentRange=[{start:21, end:108}, {start:21, end:108}, {start:21, end:108}, {start:21, end:96}]; //min and max MIDI note values per instrument (piano, ac. guitar, flute, el. guitar)
 
-var previousMouse={x:-1, y:-1};
-var line={start:{x:-1, y:-1}, end:{x:-1, y:-1}}
-var mediaRecorder;
-var chunks = [];
+var previousMouse={x:-1, y:-1}; //where the mouse was in the previous frame (used for erasing lines)
 
-var time={previous:Date.now(), current:Date.now()};
+var mediaRecorder, //used for recording
+    chunks = []; //used by MediaRecorder to save intermediate recordings
+
+var time={previous:Date.now(), current:Date.now()}; //time between two frames, used to calculate velocity
 
 window.onload=function(){
   canvas = document.getElementById('canvas');
