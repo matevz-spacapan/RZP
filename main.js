@@ -145,9 +145,7 @@ function drawAll(){
 
 //clear the entire canvas
 function clearCanvas(){
-  ctx.fillStyle = "white";
-  //ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 //change mode to removing lines
